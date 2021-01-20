@@ -2,3 +2,18 @@ body{
     background-color: #fff;
     font-size: 18px;
 }
+
+#ticketButton{
+    position: relative;
+    left: 50%;
+    transform: translate(-50%);
+}
+
+.bold{
+    font-weight: 600;
+}
+
+.card-title{
+    font-size: 1.25rem;
+    font-weight: 700;
+}

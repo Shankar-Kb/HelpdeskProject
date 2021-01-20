@@ -8,7 +8,9 @@ function createHtmlElement(element,  className='', id=''){
     return elem;
 }
 
+
 async function sendRequest(){
+if (document.getElementById('ticketBox').textContent !== "") return;
 let originalApiKey = "cMDZbL73DjiNMEH2XWp";
 let apiKey = "Y01EWmJMNzNEamlOTUVIMlhXcDpY";
 let domainName = "newaccount1611048753883";
@@ -21,10 +23,11 @@ let freshResp = await fetch(URL, {
                                     }
                                   });
 let freshData = await freshResp.json();
-console.log(freshData);
+//console.log(freshData);
 displayTickets(freshData);
 
 }
+
 
 function displayTickets(ticketsArray){
 
@@ -33,8 +36,9 @@ ticketsArray.forEach( (elem, index) => {
      var card = createHtmlElement('div', 'card ticket-body', `card${index}`);
      ticketBox.appendChild(card);
      var cardBody = createHtmlElement('div', 'card-body');
-     cardBody.innerHTML = `ID: ${elem.id}, Email: ${elem.requester.email}, Name: ${elem.requester.name}<br>
-     Status: ${convertStatus(elem.status)}, Priority: ${convertPriority(elem.priority)}`;
+     cardBody.innerHTML = `<h5 class="card-title">${elem.subject}</h5>
+     <p class="card-text"><span class="bold">ID:</span> ${elem.id}, <span class="bold">Email:</span> ${elem.requester.email}, <span class="bold">Name:</span> ${elem.requester.name}<br>
+     <span class="bold">Status:</span> ${convertStatus(elem.status)}, <span class="bold">Priority:</span> ${convertPriority(elem.priority)}</p>`;
      card.append(cardBody);
      
      var inputGrpMain = createHtmlElement('div', 'input-group');
@@ -42,7 +46,7 @@ ticketsArray.forEach( (elem, index) => {
      var inputGrpPre = createHtmlElement('div', 'input-group-prepend');
      inputGrpPre.innerHTML = `<label class="input-group-text">Change Status</label>`;
 
-     var selectStatus = createHtmlElement('select', 'custom-select', 'selectStatus');
+     var selectStatus = createHtmlElement('select', 'custom-select', `status${index}`);
      selectStatus.name = "status";
      selectStatus.innerHTML = `<option selected>Choose...</option>
      <option value="2">Open</option>
@@ -56,15 +60,55 @@ ticketsArray.forEach( (elem, index) => {
      statusButton.innerHTML = `Set`;
      inputGrpApp.append(statusButton);
      
-     var newStatus = document.getElementById('selectStatus');
+     
      statusButton.addEventListener('click', () => {
-      changeStatus(+newStatus.selectedOptions[0].value);
-     });         
+      var newStatus = document.getElementById(`status${index}`);
+      changeStatusPriority(newStatus.selectedOptions[0].value, elem.id, "status");
+     });
+     
+
+
+     var inputGrpPreP = createHtmlElement('div', 'input-group-prepend');
+     inputGrpPreP.innerHTML = `<label class="input-group-text">Change Priority</label>`;
+
+     var selectStatusP = createHtmlElement('select', 'custom-select', `priority${index}`);
+     selectStatusP.name = "priority";
+     selectStatusP.innerHTML = `<option selected>Choose...</option>
+     <option value="1">Low</option>
+     <option value="2">Medium</option>
+     <option value="3">High</option>
+     <option value="4">Urgent</option>`;
+
+     var inputGrpAppP = createHtmlElement('div', 'input-group-append');
+     inputGrpMain.append(inputGrpPreP, selectStatusP, inputGrpAppP);
+     var statusButton = createHtmlElement('button', 'btn btn-secondary', 'statusButton');
+     statusButton.innerHTML = `Set`;
+     inputGrpAppP.append(statusButton);
+     
+     statusButton.addEventListener('click', () => {
+      var newPriority = document.getElementById(`priority${index}`);
+      changeStatusPriority(newPriority.selectedOptions[0].value, elem.id, "priority");
+     });
 });
 }
 
-function changeStatus(value){
-    console.log(value);
+async function changeStatusPriority(newValue, ticketNumber, type){
+              let newStatusResp = await fetch("https://newaccount1611048753883.freshdesk.com/api/v2/tickets/"+ticketNumber, {
+                body: "{ \""+type+"\":"+newValue+" }",
+                headers: {
+                  Authorization: "Basic Y01EWmJMNzNEamlOTUVIMlhXcDpY",
+                  "Content-Type": "application/json"
+                },
+                method: "PUT"
+                });
+              let newStatusData = await newStatusResp.json();
+              console.log(newStatusData);
+              refreshTickets();                                          
+}
+
+function refreshTickets(){
+  document.getElementById('ticketBox').innerHTML = ``;
+  sendRequest();
 }
 
 function convertPriority(number){
@@ -91,16 +135,3 @@ function convertStatus(number){
           return 'Closed';
       }
 }
-
-/* <div class="input-group-prepend">
-    <label class="input-group-text" for="inputGroupSelect01">Status</label>
-  </div>
-  <select class="custom-select" id="inputGroupSelect01">
-    <option selected>Choose...</option>
-    <option value="1">One</option>
-    <option value="2">Two</option>
-    <option value="3">Three</option>
-  </select>
-  <div class="input-group-append">
-    <button class="btn btn-outline-secondary" type="button">Set New Status</button>
-  </div> */
