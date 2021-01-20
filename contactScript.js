@@ -24,10 +24,10 @@ let freshResp = await fetch(URL, {
                                   });
 let freshData = await freshResp.json();
 //console.log(freshData);
-displayTickets(freshData);
+displayContacts(freshData);
 }
 
-function displayTickets(ticketsArray){
+function displayContacts(ticketsArray){
 
     let contactBox = document.querySelector('.contact-box');
     ticketsArray.forEach( (elem, index) => {
